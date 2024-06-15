@@ -7,7 +7,7 @@ logo = 'http://npcirs.ru/images/logo.png'
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    keyboard = types.InlineKeyboardMarkup()
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
     btn1 = types.InlineKeyboardButton("Создание заявки", callback_data="create_request")
     btn2 = types.InlineKeyboardButton("Другой вопрос", callback_data="other_question")
     btn3 = types.InlineKeyboardButton("Контактная информация", callback_data="contact_info")
