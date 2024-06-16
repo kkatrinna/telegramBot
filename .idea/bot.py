@@ -9,7 +9,7 @@ user_data = {}
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton("Создание заявки", callback_data="create_request")
     btn2 = types.InlineKeyboardButton("Другой вопрос", callback_data="other_question")
     btn3 = types.InlineKeyboardButton("Контактная информация", callback_data="contact_info")
@@ -30,6 +30,10 @@ def handle_callback(call):
                                                f"Телефон горячей линии: 8-800-100-40-90\n"
                                                f"E-mail: npcirs@npcirs.ru\n"
                                                f"Адрес главного офиса: 117393, г. Москва, ул. Профсоюзная, д. 78, стр. 1; этаж 8\n")
+    elif call.data == 'yes':
+        bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
+    elif call.data == 'edit':
+        pass
 def get_surname(message):
     user_data['surname'] = message.text
     bot.send_message(message.chat.id, "Укажите ВК")
@@ -40,22 +44,36 @@ def get_vk(message):
     bot.register_next_step_handler(message, get_numzav)
 def get_numzav(message):
     user_data['numzav'] = message.text
-    bot.send_message(message.chat.id, "Опишите Вашу проблему")
+    bot.send_message(message.chat.id, "Укажите Ваш номер телефона")
+    bot.register_next_step_handler(message, get_phone)
+def get_phone(message):
+    user_data['phone'] = message.text
+    bot.send_message(message.chat.id, "Укажите Вашу почту")
+    bot.register_next_step_handler(message, get_email)
+def get_email(message):
+    user_data['email'] = message.text
+    bot.send_message(message.chat.id, "Опишите проблему")
     bot.register_next_step_handler(message, get_description)
 def get_description(message):
     user_data['description'] = message.text
     bot.send_message(message.chat.id, "Отправьте фото проблемы")
     bot.register_next_step_handler(message, get_photo)
+def show_confirmation_keyboard(message):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    yes_button = types.InlineKeyboardButton("Да", callback_data="yes")
+    edit_button = types.InlineKeyboardButton("Изменить", callback_data="edit")
+    keyboard.add(yes_button, edit_button)
+    bot.send_message(message.chat.id, f"Спасибо! Ваши данные: \n"
+                                      f"ФИО: {user_data['surname']}\n"
+                                      f"Телефон: {user_data['phone']}\n"
+                                      f"Почта: {user_data['phone']}\n"
+                                      f"ВК: {user_data['vk']}\n"
+                                      f"ЗАВ№: {user_data['numzav']}\n"
+                                      f"Проблема: {user_data['description']}\n"
+                                      f"Фото проблемы: {user_data['photo']}\n", reply_markup=keyboard)
 def get_photo(message):
     user_data['photo'] = message.text
-    bot.send_message(message.chat.id, "Теперь укажите Ваш номер телефона")
-    bot.register_next_step_handler(message, get_phone)
-def get_phone(message):
-    user_data['email'] = message.text
-    bot.send_message(message.chat.id, "Укажите Вашу почту")
-    bot.register_next_step_handler(message, get_email)
-def get_email(message):
-    user_data['email'] = message.text
-    bot.send_message(message.chat.id, f"Спасибо! Ваши данные: \nФамилия: {user_data['surname']}\nТелефон: {user_data['phone']}")
+    show_confirmation_keyboard(message)
+
 
 bot.polling(none_stop=True, interval=0)
