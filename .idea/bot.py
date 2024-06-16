@@ -32,6 +32,7 @@ def handle_callback(call):
                                                f"Адрес главного офиса: 117393, г. Москва, ул. Профсоюзная, д. 78, стр. 1; этаж 8\n")
     elif call.data == 'yes':
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
+        send_welcome(call.message)
     elif call.data == 'edit':
         user_data.clear()
         bot.send_message(call.message.chat.id, "Пожалуйста, напишите Ваше ФИО")
