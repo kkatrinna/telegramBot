@@ -33,7 +33,9 @@ def handle_callback(call):
     elif call.data == 'yes':
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
     elif call.data == 'edit':
-        pass
+        user_data.clear()
+        bot.send_message(call.message.chat.id, "Пожалуйста, напишите Ваше ФИО")
+        bot.register_next_step_handler(call.message, get_surname)
 def get_surname(message):
     user_data['surname'] = message.text
     bot.send_message(message.chat.id, "Укажите ВК")
@@ -71,9 +73,11 @@ def show_confirmation_keyboard(message):
                                       f"ЗАВ№: {user_data['numzav']}\n"
                                       f"Проблема: {user_data['description']}\n"
                                       f"Фото проблемы: {user_data['photo']}\n", reply_markup=keyboard)
+
 def get_photo(message):
     user_data['photo'] = message.text
     show_confirmation_keyboard(message)
+
 
 
 bot.polling(none_stop=True, interval=0)
