@@ -25,10 +25,9 @@ def handle_callback(call):
     elif call.data == "other_question":
         bot.send_message(call.message.chat.id, "Пожалуйста, задайте Ваш вопрос")
     elif call.data == "contact_info":
-        bot.send_message(call.message.chat.id, f"Тел.: (495)330-07-88\n"
-                                               f"Факс: (495)330-56-01\n"
-                                               f"Телефон горячей линии: 8-800-100-40-90\n"
-                                               f"E-mail: npcirs@npcirs.ru\n"
+        bot.send_message(call.message.chat.id, f"Телефон техподдержки: 8 495 137 51 41\n"
+                                               f"Телефон техподдержки в/ч : 8 495 330 51 11\n"
+                                               f"E-mail: support@npcirs.ru\n"
                                                f"Адрес главного офиса: 117393, г. Москва, ул. Профсоюзная, д. 78, стр. 1; этаж 8\n")
     elif call.data == 'yes':
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
@@ -39,11 +38,11 @@ def handle_callback(call):
         bot.register_next_step_handler(call.message, get_surname)
 def get_surname(message):
     user_data['surname'] = message.text
-    bot.send_message(message.chat.id, "Укажите ВК")
+    bot.send_message(message.chat.id, "Укажите Военный комиссариат")
     bot.register_next_step_handler(message, get_vk)
 def get_vk(message):
     user_data['vk'] = message.text
-    bot.send_message(message.chat.id, "Укажите ЗАВ№")
+    bot.send_message(message.chat.id, "Укажите заводской номер (арма или сервера)")
     bot.register_next_step_handler(message, get_numzav)
 def get_numzav(message):
     user_data['numzav'] = message.text
@@ -52,11 +51,8 @@ def get_numzav(message):
 def get_phone(message):
     user_data['phone'] = message.text
     bot.send_message(message.chat.id, "Укажите Вашу почту")
-    bot.register_next_step_handler(message, get_email)
-def get_email(message):
-    user_data['email'] = message.text
-    bot.send_message(message.chat.id, "Опишите проблему")
     bot.register_next_step_handler(message, get_description)
+
 def get_description(message):
     user_data['description'] = message.text
     bot.send_message(message.chat.id, "Отправьте фото проблемы")
@@ -69,12 +65,10 @@ def show_confirmation_keyboard(message):
     bot.send_message(message.chat.id, f"Спасибо! Ваши данные: \n"
                                       f"ФИО: {user_data['surname']}\n"
                                       f"Телефон: {user_data['phone']}\n"
-                                      f"Почта: {user_data['phone']}\n"
-                                      f"ВК: {user_data['vk']}\n"
-                                      f"ЗАВ№: {user_data['numzav']}\n"
+                                      f"Военный комиссариат: {user_data['vk']}\n"
+                                      f"Заводской номер: {user_data['numzav']}\n"
                                       f"Проблема: {user_data['description']}\n"
                                       f"Фото проблемы: {user_data['photo']}\n", reply_markup=keyboard)
-
 def get_photo(message):
     user_data['photo'] = message.text
     show_confirmation_keyboard(message)
