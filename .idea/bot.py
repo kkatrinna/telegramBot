@@ -34,6 +34,7 @@ def handle_callback(call):
         bot.register_next_step_handler(call.message, get_surname)
     elif call.data == "other_question":
         bot.send_message(call.message.chat.id, "Пожалуйста, задайте Ваш вопрос")
+        bot.register_next_step_handler(call.message, get_question)
     elif call.data == "contact_info":
         bot.send_message(call.message.chat.id, f"Телефон техподдержки: 8 495 137 51 41\n"
                                                f"Телефон техподдержки в/ч : 8 495 330 51 11\n"
@@ -79,7 +80,7 @@ def get_vk(message):
     bot.register_next_step_handler(message, get_numzav)
 def get_numzav(message):
     user_data['numzav'] = message.text
-    bot.send_message(message.chat.id, "Укажите Ваш номер телефона (формат: 8999-999-99-99")
+    bot.send_message(message.chat.id, "Укажите Ваш номер телефона")
     bot.register_next_step_handler(message, get_phone)
 def get_phone(message):
     user_data['phone'] = message.text
@@ -105,8 +106,15 @@ def get_photo(message):
     user_data['photo'] = message.text
     show_confirmation_keyboard(message)
 
-
-
+def get_question(message):
+    question = message.text
+    bot.send_message(message.chat.id, "Ваш вопрос будет рассмотрен.")
+    cursor = con.cursor()
+    sql = "INSERT INTO question (Descriptions) VALUES (%s)"
+    values = (question)
+    cursor.execute(sql, values)
+    con.commit()
+    send_welcome(message)
 
 bot.polling(none_stop=True, interval=0)
 
