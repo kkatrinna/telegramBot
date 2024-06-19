@@ -43,8 +43,12 @@ def handle_callback(call):
         cursor = con.cursor()
         sql = '''insert into client(FirstName, LastName, Patronymic, Phone)
         values (%s, %s, %s, %s)'''
-        values = (surname, name, patronymic, user_data.get('phone', ''))
+        values = (userdata.get(0, ''), userdata.get(1, ''), userdata.get(2, ''), user_data.get('phone', ''))
         cursor.execute(sql, values)
+        sql2 = '''insert into application(Voenkomat, NumberZav, Descriptions, Photo) 
+        values (%s, %s, %s, %s)'''
+        values2 = (user_data.get('vk', ''), user_data.get('numzav', ''), user_data.get('description', ''),user_data.get('photo', ''))
+        cursor.execute(sql2, values2)
         con.commit()
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
         send_welcome(call.message)
@@ -53,20 +57,20 @@ def handle_callback(call):
         bot.send_message(call.message.chat.id, "Пожалуйста, напишите Ваше ФИО")
         bot.register_next_step_handler(call.message, get_surname)
 
-global surname, name, patronymic
-surname = ""
-name = ""
-patronymic = ""
+userdata = {}
 def get_surname(message):
     user_data['surname'] = message.text
     bot.send_message(message.chat.id, "Укажите Военный комиссариат")
     bot.register_next_step_handler(message, get_vk)
-    name_parts = user_data['surname'].split(' ')
+    name_parts = user_data['surname'].split()
     if len(name_parts) == 3:
         surname = name_parts[0]
         name = name_parts[1]
         patronymic = name_parts[2]
-    return surname, name, patronymic
+    userdata[0] = surname
+    userdata[1] = name
+    userdata[2] = patronymic
+    return userdata
 
 def get_vk(message):
     user_data['vk'] = message.text
