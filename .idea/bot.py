@@ -40,22 +40,34 @@ def handle_callback(call):
                                                f"E-mail: support@npcirs.ru\n"
                                                f"Адрес главного офиса: 117393, г. Москва, ул. Профсоюзная, д. 78, стр. 1; этаж 8\n")
     elif call.data == 'yes':
+        cursor = con.cursor()
+        sql = '''insert into client(FirstName, LastName, Patronymic, Phone)
+        values (%s, %s, %s, %s)'''
+        values = (surname, name, patronymic, user_data.get('phone', ''))
+        cursor.execute(sql, values)
+        con.commit()
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
         send_welcome(call.message)
     elif call.data == 'edit':
         user_data.clear()
         bot.send_message(call.message.chat.id, "Пожалуйста, напишите Ваше ФИО")
         bot.register_next_step_handler(call.message, get_surname)
+
+global surname, name, patronymic
+surname = ""
+name = ""
+patronymic = ""
 def get_surname(message):
     user_data['surname'] = message.text
-    name_parts = user_data['surname'].split()
+    bot.send_message(message.chat.id, "Укажите Военный комиссариат")
+    bot.register_next_step_handler(message, get_vk)
+    name_parts = user_data['surname'].split(' ')
     if len(name_parts) == 3:
         surname = name_parts[0]
         name = name_parts[1]
         patronymic = name_parts[2]
     return surname, name, patronymic
-    bot.send_message(message.chat.id, "Укажите Военный комиссариат")
-    bot.register_next_step_handler(message, get_vk)
+
 def get_vk(message):
     user_data['vk'] = message.text
     bot.send_message(message.chat.id, "Укажите заводской номер (арма или сервера)")
@@ -90,13 +102,7 @@ def get_photo(message):
     show_confirmation_keyboard(message)
 
 
-cursor = con.cursor()
 
-sql = '''insert into client(FirstName, LastName, Patronymic)
-values (%s, %s, %s)'''
-values = (surname, name, patronymic)
-cursor.execute(sql, values)
-con.commit()
 
 bot.polling(none_stop=True, interval=0)
 
