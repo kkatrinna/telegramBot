@@ -45,9 +45,10 @@ def handle_callback(call):
         values (%s, %s, %s, %s)'''
         values = (userdata.get(0, ''), userdata.get(1, ''), userdata.get(2, ''), user_data.get('phone', ''))
         cursor.execute(sql, values)
-        sql2 = '''insert into application(Voenkomat, NumberZav, Descriptions, Photo) 
-        values (%s, %s, %s, %s)'''
-        values2 = (user_data.get('vk', ''), user_data.get('numzav', ''), user_data.get('description', ''),user_data.get('photo', ''))
+        clientId = cursor.lastrowid
+        sql2 = '''insert into application(IdClient, Voenkomat, NumberZav, Descriptions, Photo) 
+        values (%s, %s, %s, %s, %s)'''
+        values2 = (clientId, user_data.get('vk', ''), user_data.get('numzav', ''), user_data.get('description', ''),user_data.get('photo', ''))
         cursor.execute(sql2, values2)
         con.commit()
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
@@ -78,13 +79,12 @@ def get_vk(message):
     bot.register_next_step_handler(message, get_numzav)
 def get_numzav(message):
     user_data['numzav'] = message.text
-    bot.send_message(message.chat.id, "Укажите Ваш номер телефона")
+    bot.send_message(message.chat.id, "Укажите Ваш номер телефона (формат: 8999-999-99-99")
     bot.register_next_step_handler(message, get_phone)
 def get_phone(message):
     user_data['phone'] = message.text
     bot.send_message(message.chat.id, "Опишите Вашу проблему")
     bot.register_next_step_handler(message, get_description)
-
 def get_description(message):
     user_data['description'] = message.text
     bot.send_message(message.chat.id, "Отправьте фото проблемы")
