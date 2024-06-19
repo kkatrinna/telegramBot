@@ -1,5 +1,15 @@
 import telebot
 from telebot import types
+import pymysql
+
+con = pymysql.connect(
+    host='localhost',
+    port=3306,
+    user='root',
+    password='1234',
+    database='database',
+    cursorclass=pymysql.cursors.DictCursor
+)
 
 bot = telebot.TeleBot('6337501489:AAHF7J0K1435ZBHr8IohegDWsIZ0S6DB3Hc')
 
@@ -38,6 +48,12 @@ def handle_callback(call):
         bot.register_next_step_handler(call.message, get_surname)
 def get_surname(message):
     user_data['surname'] = message.text
+    name_parts = user_data['surname'].split()
+    if len(name_parts) == 3:
+        surname = name_parts[0]
+        name = name_parts[1]
+        patronymic = name_parts[2]
+    return surname, name, patronymic
     bot.send_message(message.chat.id, "Укажите Военный комиссариат")
     bot.register_next_step_handler(message, get_vk)
 def get_vk(message):
@@ -50,7 +66,7 @@ def get_numzav(message):
     bot.register_next_step_handler(message, get_phone)
 def get_phone(message):
     user_data['phone'] = message.text
-    bot.send_message(message.chat.id, "Укажите Вашу почту")
+    bot.send_message(message.chat.id, "Опишите Вашу проблему")
     bot.register_next_step_handler(message, get_description)
 
 def get_description(message):
@@ -74,5 +90,13 @@ def get_photo(message):
     show_confirmation_keyboard(message)
 
 
+cursor = con.cursor()
+
+sql = '''insert into client(FirstName, LastName, Patronymic)
+values (%s, %s, %s)'''
+values = (surname, name, patronymic)
+cursor.execute(sql, values)
+con.commit()
 
 bot.polling(none_stop=True, interval=0)
+
