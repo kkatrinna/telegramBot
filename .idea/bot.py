@@ -1,6 +1,8 @@
 import telebot
 from telebot import types
 import pymysql
+import os
+
 
 con = pymysql.connect(
     host='localhost',
@@ -47,9 +49,9 @@ def handle_callback(call):
         values = (userdata.get(0, ''), userdata.get(1, ''), userdata.get(2, ''), user_data.get('phone', ''))
         cursor.execute(sql, values)
         clientId = cursor.lastrowid
-        sql2 = '''insert into application(IdClient, Voenkomat, NumberZav, Descriptions, Photo) 
+        sql2 = '''insert into application(IdClient, Voenkomat, NumberZav, Descriptions) 
         values (%s, %s, %s, %s, %s)'''
-        values2 = (clientId, user_data.get('vk', ''), user_data.get('numzav', ''), user_data.get('description', ''),user_data.get('photo', ''))
+        values2 = (clientId, user_data.get('vk', ''), user_data.get('numzav', ''), user_data.get('description', ''))
         cursor.execute(sql2, values2)
         con.commit()
         bot.send_message(call.message.chat.id, "Заявка принята. В течение 3 дней ожидайте ответа")
@@ -76,7 +78,7 @@ def get_surname(message):
 
 def get_vk(message):
     user_data['vk'] = message.text
-    bot.send_message(message.chat.id, "Укажите заводской номер (арма или сервера)")
+    bot.send_message(message.chat.id, "Укажите заводской номер")
     bot.register_next_step_handler(message, get_numzav)
 def get_numzav(message):
     user_data['numzav'] = message.text
@@ -92,8 +94,8 @@ def get_description(message):
     bot.register_next_step_handler(message, get_photo)
 def show_confirmation_keyboard(message):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    yes_button = types.InlineKeyboardButton("Да", callback_data="yes")
-    edit_button = types.InlineKeyboardButton("Изменить", callback_data="edit")
+    yes_button = types.InlineKeyboardButton("Отправить заявку", callback_data="yes")
+    edit_button = types.InlineKeyboardButton("Редактировать", callback_data="edit")
     keyboard.add(yes_button, edit_button)
     bot.send_message(message.chat.id, f"Спасибо! Ваши данные: \n"
                                       f"ФИО: {user_data['surname']}\n"
@@ -103,9 +105,21 @@ def show_confirmation_keyboard(message):
                                       f"Проблема: {user_data['description']}\n"
                                       f"Фото проблемы: {user_data['photo']}\n", reply_markup=keyboard)
 def get_photo(message):
-    user_data['photo'] = message.text
+    user_data['photo'] = message.photo
     show_confirmation_keyboard(message)
-
+    photo_id = message.photo[-1].file_id
+    photo_file = bot.get_file(photo_id)
+    filename, file_extension = os.path.splitext(photo_file.file_path)
+    down = bot.download_file(photo_file.file_path)
+    src = 'img/'+photo_id+file_extension
+    with open(src, 'wb') as new_file:
+        new_file.write(down)
+    cursor = con.cursor()
+    sql = '''insert into photo(Src)) values (%s)'''
+    values = (src,)
+    cursor.execute(sql, values)
+    con.commit()
+    bot.send_message(chat_id=message.chat.id, text="Фото сохранено на диске")
 def get_question(message):
     question = message.text
     bot.send_message(message.chat.id, "Ваш вопрос будет рассмотрен.")
@@ -115,6 +129,7 @@ def get_question(message):
     cursor.execute(sql, values)
     con.commit()
     send_welcome(message)
+
 
 bot.polling(none_stop=True, interval=0)
 
