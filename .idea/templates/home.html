@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Главная страница</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/stylehome.css') }}">
+    </head>
+    <body>
+        <header>
+            <img src="http://npcirs.ru/images/logo.png" height="90px" width="300px">
+            <div class="nav">
+                <ul>
+                 <li class="active"><a href="/">Главная</a></li>
+                 <li><a href="/zayavka">Заявки</a></li>
+                 <li><a href="/question">Вопросы</a></li>
+
+                </ul>
+               </div>
+        </header>
+
+        <table border = "1">
+            {% for user in details %}
+            <tr>
+                <td>{{user[0]}}</td>
+                <td>{{user[1]}}</td>
+                <td>{{user[2]}}</td>
+                <td>{{user[3]}}</td>
+                <td>{{user[4]}}</td>
+                <td>{{user[5]}}</td>
+                <td>{{user[6]}}</td>
+                <td>{{user[7]}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <footer>
+            <div id="copyrightF">© НПЦ ИРС, 2024</div>
+        </footer>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        
+        <script src="" async defer></script>
+    </body>
+</html>

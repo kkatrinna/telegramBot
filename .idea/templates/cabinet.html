@@ -1,0 +1,77 @@
+<!DOCTYPE <!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Личный кабинет</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/stylecab.css') }}">
+    </head>
+    <body>
+        <header>
+            <img src="http://npcirs.ru/images/logo.png" height="100px" width="350px">
+            <div class="nav">
+                <ul>
+                 <li><a href="/">Главная</a></li>
+                 <li><a href="/zayavka">Заявки</a></li>
+                 <li><a href="/question">Вопросы</a></li>
+                 <li class="active"><a href="/cabinet">Личный кабинет</a></li>
+                </ul>
+               </div>
+        </header>
+        <div class="main">
+            <span class="profile-picture">
+            <img class="editable img-responsive" alt=" Avatar" id="avatar2" src="http://bootdey.com/img/Content/avatar/avatar6.png" width="50" height="50">
+          </span>
+
+          <div class="space space-4"></div>
+        <span class="middle">Иванов Иван Иванович</span>
+
+        <div class="profile-user-info">
+		    
+            <div class="profile-info-row">
+		        <div class="profile-info-name"> Фамилия </div>
+					<div class="profile-info-value">
+						<span>Иванов</span>
+					</div>
+				</div>
+            <div class="profile-info-row">
+                <div class="profile-info-name"> Имя </div>
+                    <div class="profile-info-value">
+                        <span>Иван</span>
+                    </div>
+                </div>
+            <div class="profile-info-row">
+                <div class="profile-info-name"> Отчество </div>
+                    <div class="profile-info-value">
+                        <span>Иванович</span>
+                    </div>
+                </div>
+            <div class="profile-info-row">
+				<div class="profile-info-name"> email </div>
+					<div class="profile-info-value">
+						<i class="fa fa-map-marker light-orange bigger-110"></i>
+						<span>iv565tf@mail.ru</span>
+					</div>
+				</div>
+
+    		<div class="profile-info-row">
+				<div class="profile-info-name"> Телефон </div>
+	    			<div class="profile-info-value">
+    					<span>+79876753906</span>
+					</div>
+				</div>
+			</div>
+        </div>
+            <footer>
+                <div id="copyrightF">© НПЦ ИРС, 2024</div>
+            </footer>
+					
+        <script src="" async defer></script>
+    </body>
+</html>
