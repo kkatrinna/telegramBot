@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 import pymysql
 import os
-
+import sys
 
 con = pymysql.connect(
     host='localhost',
@@ -29,14 +29,29 @@ def send_welcome(message):
 
     bot.send_message(message.chat.id, text="НПЦ ИРС \n Чем я могу Вам помочь?", reply_markup=keyboard)
 
+@bot.message_handler(commands=['reset'])
+def restart():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    btn1 = types.InlineKeyboardButton("Создание заявки", callback_data="create_request")
+    btn2 = types.InlineKeyboardButton("Другой вопрос", callback_data="other_question")
+    btn3 = types.InlineKeyboardButton("Контактная информация", callback_data="contact_info")
+    keyboard.add(btn1, btn2, btn3)
+
+    bot.send_message(message.chat.id, text="НПЦ ИРС \n Чем я могу Вам помочь?", reply_markup=keyboard)
+
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
     if call.data == "create_request":
         bot.send_message(call.message.chat.id, "Пожалуйста, напишите Ваше ФИО")
         bot.register_next_step_handler(call.message, get_surname)
     elif call.data == "other_question":
-        bot.send_message(call.message.chat.id, "Пожалуйста, задайте Ваш вопрос")
-        bot.register_next_step_handler(call.message, get_question)
+        bot.send_message(call.message.chat.id, "Пожалуйста, напишите Ваше ФИО")
+        bot.register_next_step_handler(call.message, get_name)
     elif call.data == "contact_info":
         bot.send_message(call.message.chat.id, f"Телефон техподдержки: 8 495 137 51 41\n"
                                                f"Телефон техподдержки в/ч : 8 495 330 51 11\n"
@@ -104,32 +119,42 @@ def show_confirmation_keyboard(message):
                                       f"Заводской номер: {user_data['numzav']}\n"
                                       f"Проблема: {user_data['description']}\n"
                                       f"Фото проблемы: {user_data['photo']}\n", reply_markup=keyboard)
+
 def get_photo(message):
-    user_data['photo'] = message.photo
+    user_data[message.chat.id]['photo'] = message.text
     show_confirmation_keyboard(message)
-    photo_id = message.photo[-1].file_id
-    photo_file = bot.get_file(photo_id)
-    filename, file_extension = os.path.splitext(photo_file.file_path)
-    down = bot.download_file(photo_file.file_path)
-    src = 'img/'+photo_id+file_extension
-    with open(src, 'wb') as new_file:
-        new_file.write(down)
-    cursor = con.cursor()
-    sql = '''insert into photo(Src)) values (%s)'''
-    values = (src,)
-    cursor.execute(sql, values)
-    con.commit()
-    bot.send_message(chat_id=message.chat.id, text="Фото сохранено на диске")
+
+def get_name(message):
+    user_data[message.chat.id] = {}
+    user_data[message.chat.id]['surname'] = message.text
+    bot.send_message(message.chat.id, "Укажите номер телефона")
+    bot.register_next_step_handler(message, get_phonequest)
+    name_parts = user_data[message.chat.id]['surname'].split()
+    if len(name_parts) == 3:
+        user_data[message.chat.id][0] = name_parts[0]
+        user_data[message.chat.id][1] = name_parts[1]
+        user_data[message.chat.id][2] = name_parts[2]
+    return user_data[message.chat.id]
+
+def get_phonequest(message):
+    user_data[message.chat.id]['phone'] = message.text
+    bot.send_message(message.chat.id, "Напишите Ваш вопрос")
+    bot.register_next_step_handler(message, get_question)
+
 def get_question(message):
     question = message.text
     bot.send_message(message.chat.id, "Ваш вопрос будет рассмотрен.")
     cursor = con.cursor()
-    sql = "INSERT INTO question (Descriptions) VALUES (%s)"
-    values = (question)
+    sql = '''insert into client(FirstName, LastName, Patronymic, Phone)
+        values (%s, %s, %s, %s)'''
+    values = (user_data[message.chat.id].get(0, ''), user_data[message.chat.id].get(1, ''), user_data[message.chat.id].get(2, ''), user_data[message.chat.id].get('phone', ''))
     cursor.execute(sql, values)
+    clientId = cursor.lastrowid
+    sql2 = "INSERT INTO question(Descriptions, IdClient) VALUES (%s, %s)"
+    values2 = (question, clientId)
+    cursor.execute(sql2, values2)
     con.commit()
     send_welcome(message)
 
 
 bot.polling(none_stop=True, interval=0)
-
